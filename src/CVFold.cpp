@@ -43,26 +43,29 @@ struct CVFold : Module {
         static int prevn=-1;
         for(int i=0;i<NUMPATHS;i++){
             if(outputs[OUT1_OUTPUT+i].isConnected()){
-                float pitch;
                 if(inputs[IN1_INPUT+i].isConnected()){
-                    pitch = inputs[IN1_INPUT+i].getVoltage();
+                    int channels = std::max(inputs[IN1_INPUT+i].getChannels(),1);
                     float octF = params[OCT1_PARAM+i].getValue();
                     int oct = (int)(std::round(octF));
-                    // 1V/oct
-                    int note = (int)((pitch*12.0f)+0.001f);
-                    if(note!=prevn){
-                        printf("%d %d\n",note,oct);
-                        prevn=note;
+                    for(int c = 0; c<channels; c++){
+                        float pitch = inputs[IN1_INPUT+i].getPolyVoltage(c);
+                        // 1V/oct
+                        int note = (int)((pitch*12.0f)+0.001f);
+                        if(note!=prevn){
+                            printf("%d %d\n",note,oct);
+                            prevn=note;
+                        }
+                    
+                        note = note%12; // remove octave
+                        note += oct*12;
+                    
+                        pitch = ((float)note) / 12.0f;
+                        outputs[OUT1_OUTPUT+i].setVoltage(pitch, c);
                     }
-                    
-                    note = note%12; // remove octave
-                    note += oct*12;
-                    
-                    pitch = ((float)note) / 12.0f;
+                    outputs[OUT1_OUTPUT+i].setChannels(channels);
                 } else {
-                    pitch = 0;
+                    outputs[OUT1_OUTPUT+i].setVoltage(0);
                 }
-                outputs[OUT1_OUTPUT+i].setVoltage(pitch);
             }
         }
     }
