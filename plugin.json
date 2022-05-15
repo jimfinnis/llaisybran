@@ -1,0 +1,23 @@
+{
+  "slug": "llais_y_bran",
+  "name": "Llais y Brân",
+  "version": "2.0.0",
+  "license": "MIT",
+  "brand": "Llais y Brân",
+  "author": "Jim Finnis",
+  "authorEmail": "jim.finnis@gmail.com",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "OctaveLimiter",
+      "name": "Octave Limiter",
+      "description": "Quantises a pitch signal and locks it to keep within 1-3 octaves, wrapping around if out of range.",
+      "tags": []
+    }
+  ]
+}

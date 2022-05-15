@@ -29,7 +29,7 @@
      inkscape:cx="357.8281"
      inkscape:cy="241.91579"
      inkscape:document-units="mm"
-     inkscape:current-layer="g1925"
+     inkscape:current-layer="layer3"
      showgrid="true"
      inkscape:window-width="1853"
      inkscape:window-height="1025"
@@ -420,7 +420,7 @@
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="components"
-     style="display:none">
+     style="display:inline">
     <ellipse
        cx="37.753803"
        cy="29.680805"
