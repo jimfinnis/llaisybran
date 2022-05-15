@@ -18,6 +18,13 @@
       "name": "Octave Limiter",
       "description": "Quantises a pitch signal and locks it to keep within 1-3 octaves, wrapping around if out of range.",
       "tags": []
+    },
+    {
+      "slug": "PolySelect",
+      "name": "Poly Select",
+      "description": "Uses a CV to select a single channel from a polyphonic signal",
+      "tags": []
     }
+
   ]
 }

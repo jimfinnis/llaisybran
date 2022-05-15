@@ -52,7 +52,6 @@ struct OctaveLimiter : Module {
     }
     
     void process(const ProcessArgs& args) override {
-        static int prevn=-1;
         for(int i=0;i<NUMPATHS;i++){
             if(outputs[OUT1_OUTPUT+i].isConnected()){
                 if(inputs[IN1_INPUT+i].isConnected()){
@@ -67,6 +66,7 @@ struct OctaveLimiter : Module {
                         // get note - it's 1V/oct
                         int note = (int)((pitch*12.0f)+0.001f);
                         
+                        note += 1200; // ensure +ve
                         note -= noteParam; // remove start of range
                         note = note%(12*widthParam); // remove octave
                         note += octParam*12;         // add start of output octave
