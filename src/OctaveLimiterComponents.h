@@ -16,10 +16,10 @@ static Vec IN2_INPUT_POS = Vec(53.834,29.681);
 static Vec IN3_INPUT_POS = Vec(69.915,29.681);
 static Vec IN4_INPUT_POS = Vec(85.996,29.681);
 
-static Vec OUT1_OUTPUT_POS = Vec(37.754,113.066);
-static Vec OUT2_OUTPUT_POS = Vec(53.834,113.066);
-static Vec OUT3_OUTPUT_POS = Vec(69.915,113.066);
-static Vec OUT4_OUTPUT_POS = Vec(85.996,113.066);
+static Vec OUT1_OUTPUT_POS = Vec(37.754,103.012);
+static Vec OUT2_OUTPUT_POS = Vec(53.834,103.012);
+static Vec OUT3_OUTPUT_POS = Vec(69.915,103.012);
+static Vec OUT4_OUTPUT_POS = Vec(85.996,103.012);
 
 
 enum ParamId {
