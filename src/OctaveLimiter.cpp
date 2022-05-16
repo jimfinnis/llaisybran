@@ -1,43 +1,11 @@
 #include "plugin.hpp"
+#include "OctaveLimiterComponents.h"
 
 // number of in-param-out "channels", but I can't call it channels because that's
 // the name polyphony uses.
 
 static const int NUMPATHS = 4; 
 struct OctaveLimiter : Module {
-    enum ParamId {
-        OCT1_PARAM,
-              OCT2_PARAM,
-              OCT3_PARAM,
-              OCT4_PARAM,
-              NOTE1_PARAM,
-              NOTE2_PARAM,
-              NOTE3_PARAM,
-              NOTE4_PARAM,
-              WIDTH1_PARAM,
-              WIDTH2_PARAM,
-              WIDTH3_PARAM,
-              WIDTH4_PARAM,
-              PARAMS_LEN
-          };
-    enum InputId {
-        IN1_INPUT,
-              IN2_INPUT,
-              IN3_INPUT,
-              IN4_INPUT,
-              INPUTS_LEN
-          };
-    enum OutputId {
-        OUT1_OUTPUT,
-              OUT2_OUTPUT,
-              OUT3_OUTPUT,
-              OUT4_OUTPUT,
-              OUTPUTS_LEN
-          };
-    enum LightId {
-        LIGHTS_LEN
-          };
-    
     OctaveLimiter() {
         config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
         for(int i=0;i<NUMPATHS;i++){
@@ -105,28 +73,32 @@ struct OctaveLimiterWidget : ModuleWidget {
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
         
-        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(Vec(37.754, 47.246)), module, OctaveLimiter::OCT1_PARAM)));
-        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(Vec(53.834, 47.246)), module, OctaveLimiter::OCT2_PARAM)));
-        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(Vec(69.915, 47.246)), module, OctaveLimiter::OCT3_PARAM)));
-        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(Vec(85.996, 47.246)), module, OctaveLimiter::OCT4_PARAM)));
-        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(Vec(37.754, 65.767)), module, OctaveLimiter::NOTE1_PARAM)));
-        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(Vec(53.834, 65.767)), module, OctaveLimiter::NOTE2_PARAM)));
-        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(Vec(69.915, 65.767)), module, OctaveLimiter::NOTE3_PARAM)));
-        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(Vec(85.996, 65.767)), module, OctaveLimiter::NOTE4_PARAM)));
-        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(Vec(37.754, 85.876)), module, OctaveLimiter::WIDTH1_PARAM)));
-        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(Vec(53.834, 85.876)), module, OctaveLimiter::WIDTH2_PARAM)));
-        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(Vec(69.915, 85.876)), module, OctaveLimiter::WIDTH3_PARAM)));
-        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(Vec(85.996, 85.876)), module, OctaveLimiter::WIDTH4_PARAM)));
+        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(OCT1_PARAM_POS), module, OCT1_PARAM)));
+        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(OCT2_PARAM_POS), module, OCT2_PARAM)));
+        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(OCT3_PARAM_POS), module, OCT3_PARAM)));
+        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(OCT4_PARAM_POS), module, OCT4_PARAM)));
         
-        addInput(createInputCentered<PJ301MPort>(mm2px(Vec(37.754, 29.681)), module, OctaveLimiter::IN1_INPUT));
-        addInput(createInputCentered<PJ301MPort>(mm2px(Vec(53.834, 29.681)), module, OctaveLimiter::IN2_INPUT));
-        addInput(createInputCentered<PJ301MPort>(mm2px(Vec(69.915, 29.681)), module, OctaveLimiter::IN3_INPUT));
-        addInput(createInputCentered<PJ301MPort>(mm2px(Vec(85.996, 29.681)), module, OctaveLimiter::IN4_INPUT));
+        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(NOTE1_PARAM_POS), module, NOTE1_PARAM)));
+        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(NOTE2_PARAM_POS), module, NOTE2_PARAM)));
+        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(NOTE3_PARAM_POS), module, NOTE3_PARAM)));
+        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(NOTE4_PARAM_POS), module, NOTE4_PARAM)));
         
-        addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(37.754, 113)), module, OctaveLimiter::OUT1_OUTPUT));
-        addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(53.834, 113)), module, OctaveLimiter::OUT2_OUTPUT));
-        addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(69.915, 113)), module, OctaveLimiter::OUT3_OUTPUT));
-        addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(85.996, 113)), module, OctaveLimiter::OUT4_OUTPUT));
+        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(WIDTH1_PARAM_POS), module, WIDTH1_PARAM)));
+        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(WIDTH2_PARAM_POS), module, WIDTH2_PARAM)));
+        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(WIDTH3_PARAM_POS), module, WIDTH3_PARAM)));
+        addParam(snap(module,createParamCentered<KNOBSTYLE>(mm2px(WIDTH4_PARAM_POS), module, WIDTH4_PARAM)));
+        
+        
+        
+        addInput(createInputCentered<PJ301MPort>(mm2px(IN1_INPUT_POS), module, IN1_INPUT));
+        addInput(createInputCentered<PJ301MPort>(mm2px(IN2_INPUT_POS), module, IN2_INPUT));
+        addInput(createInputCentered<PJ301MPort>(mm2px(IN3_INPUT_POS), module, IN3_INPUT));
+        addInput(createInputCentered<PJ301MPort>(mm2px(IN4_INPUT_POS), module, IN4_INPUT));
+        
+        addOutput(createOutputCentered<PJ301MPort>(mm2px(OUT1_OUTPUT_POS), module, OUT1_OUTPUT));
+        addOutput(createOutputCentered<PJ301MPort>(mm2px(OUT2_OUTPUT_POS), module, OUT2_OUTPUT));
+        addOutput(createOutputCentered<PJ301MPort>(mm2px(OUT3_OUTPUT_POS), module, OUT3_OUTPUT));
+        addOutput(createOutputCentered<PJ301MPort>(mm2px(OUT4_OUTPUT_POS), module, OUT4_OUTPUT));
     }
 };
 
