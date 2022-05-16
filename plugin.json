@@ -17,13 +17,19 @@
       "slug": "OctaveLimiter",
       "name": "Octave Limiter",
       "description": "Quantises a pitch signal and locks it to keep within 1-3 octaves, wrapping around if out of range.",
-      "tags": []
+      "tags": ["Polyphonic", "Quantizer"]
+    },
+    {
+      "slug": "Lliw",
+      "name": "Lliw",
+      "description": "Takes a root note and adds intervals to produce a poly chord",
+      "tags": ["Polyphonic","Quantizer","Utility"]
     },
     {
       "slug": "PolySelect",
       "name": "Poly Select",
       "description": "Uses a CV to select a single channel from a polyphonic signal",
-      "tags": []
+      "tags": ["Polyphonic","Utility"]
     }
 
   ]

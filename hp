@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo $1 5.08 \* p | dc
+echo height always 128.5
