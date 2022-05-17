@@ -7,11 +7,11 @@
   "author": "Jim Finnis",
   "authorEmail": "jim.finnis@gmail.com",
   "authorUrl": "",
-  "pluginUrl": "",
-  "manualUrl": "",
-  "sourceUrl": "https://github.com/jimfinnis/llaisybran",
-  "donateUrl": "",
-  "changelogUrl": "",
+  "pluginUrl": "https://github.com/jimfinnis/llaisybran/",
+  "manualUrl": "https://github.com/jimfinnis/llaisybran/wiki/",
+  "sourceUrl": "https://github.com/jimfinnis/llaisybran/",
+  "donateUrl": "paypal.me/jimfinnis",
+  "changelogUrl": "https://github.com/jimfinnis/llaisybran/wiki/Change-Log",
   "modules": [
     {
       "slug": "OctaveLimiter",
