@@ -26,6 +26,12 @@
       "tags": ["Polyphonic","Quantizer","Utility"]
     },
     {
+      "slug": "Lliw2",
+      "name": "Lliw 2",
+      "description": "Takes a root note and adds intervals to produce a poly chord, produces amplitude CVs.",
+      "tags": ["Polyphonic","Quantizer","Utility"]
+    },
+    {
       "slug": "PolySelect",
       "name": "Poly Select",
       "description": "Uses a CV to select a single channel from a polyphonic signal",
