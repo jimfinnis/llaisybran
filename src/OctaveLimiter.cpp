@@ -1,5 +1,6 @@
 #include "plugin.hpp"
 #include "OctaveLimiterComponents.h"
+#include "utils.h"
 
 // number of in-param-out "channels", but I can't call it channels because that's
 // the name polyphony uses.
@@ -54,14 +55,6 @@ struct OctaveLimiter : Module {
 
 
 struct OctaveLimiterWidget : ModuleWidget {
-    
-    static Knob *snap(OctaveLimiter *m, Knob *k){
-        if(m){
-            k->getParamQuantity()->smoothEnabled=false;
-            k->getParamQuantity()->snapEnabled=true;
-        }
-        return k;
-    }
     
 #define KNOBSTYLE RoundBlackKnob
     

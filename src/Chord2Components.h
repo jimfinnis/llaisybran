@@ -1,5 +1,6 @@
-static Vec RATE_PARAM_POS = Vec(32.363,27.543);
+static Vec RATE_PARAM_POS = Vec(32.363,23.31);
 static Vec N12_PARAM_POS = Vec(14.397,28.536);
+static Vec CHANS_PARAM_POS = Vec(33.95,33.57);
 static Vec N11_PARAM_POS = Vec(14.397,37.437);
 static Vec N10_PARAM_POS = Vec(23.867,41.159);
 static Vec N9_PARAM_POS = Vec(14.397,46.338);
@@ -33,6 +34,7 @@ N3_PARAM,
 N2_PARAM,
 N1_PARAM,
 N0_PARAM,
+CHANS_PARAM,
 RATE_PARAM,
 PARAMS_LEN
 };
