@@ -4,6 +4,7 @@ This work has absolutely nothing to do with my work there!
 
 Current plugins are:
 * **Lliw**, a very simple chord generator
+* **Lliw 2**, a more complex version which has a fixed number of output channels but can fade them up and down
 * **Octave Limiter** for keeping algorithmically generated 1V/oct pitches in the same octave(s)
 * **Poly Select** for selecting a single mono channel from a poly signal with a CV
 
