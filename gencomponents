@@ -33,6 +33,16 @@ def str_to_identifier(s):
 	s = re.sub(r'\W', '_', s)
 	return s
 
+# sorts by top-left, but ALSO if Z is in the name we add lots, so they
+# go at the end.
+
+def top_left_sort(w):
+    ss = w['cy'] + 0.01 * w['cx']
+    if w['name'].lower().startswith('z'):
+        ss += 10000
+    return ss
+
+
 
 def panel_to_components(tree):
 	ns = {
@@ -137,8 +147,6 @@ def panel_to_components(tree):
 			components['lights'].append(c)
 		if color == '#ffff00' or color == '#ff0' or color == 'yellow':
 			components['widgets'].append(c)
-
-	top_left_sort = lambda w: w['cy'] + 0.01 * w['cx']
 
 	components['params'] = sorted(components['params'], key=top_left_sort)
 	components['inputs'] = sorted(components['inputs'], key=top_left_sort)

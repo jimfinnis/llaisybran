@@ -41,7 +41,6 @@ struct Chord : Module {
     }
     
     void process(const ProcessArgs& args) override {
-        
         if(divider.process()){
             for(int i=0;i<=12;i++){
                 on[i] = params[paramMap[i]].getValue()>0.1f;

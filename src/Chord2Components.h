@@ -1,6 +1,4 @@
-static Vec RATE_PARAM_POS = Vec(32.363,23.31);
 static Vec N12_PARAM_POS = Vec(14.397,28.536);
-static Vec CHANS_PARAM_POS = Vec(33.95,33.57);
 static Vec N11_PARAM_POS = Vec(14.397,37.437);
 static Vec N10_PARAM_POS = Vec(23.867,41.159);
 static Vec N9_PARAM_POS = Vec(14.397,46.338);
@@ -13,6 +11,10 @@ static Vec N3_PARAM_POS = Vec(23.867,76.763);
 static Vec N2_PARAM_POS = Vec(14.397,81.941);
 static Vec N1_PARAM_POS = Vec(23.867,85.664);
 static Vec N0_PARAM_POS = Vec(14.397,90.842);
+static Vec ZRATE_PARAM_POS = Vec(32.363,23.31);
+static Vec ZCHANS_PARAM_POS = Vec(33.95,33.57);
+static Vec ZOCTU_PARAM_POS = Vec(35.036,57.965);
+static Vec ZOCTD_PARAM_POS = Vec(35.036,72.471);
 
 static Vec ROOT_INPUT_POS = Vec(19.688,17.307);
 
@@ -34,8 +36,10 @@ N3_PARAM,
 N2_PARAM,
 N1_PARAM,
 N0_PARAM,
-CHANS_PARAM,
-RATE_PARAM,
+ZRATE_PARAM,
+ZCHANS_PARAM,
+ZOCTU_PARAM,
+ZOCTD_PARAM,
 PARAMS_LEN
 };
 

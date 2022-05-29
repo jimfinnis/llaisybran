@@ -25,13 +25,13 @@ int maxChans=-1;
 struct Channel {
     float amplitude;
     float deltaA;
-    int button;
+    int note;
     
     // init and start fade up
-    void init(int _button){
+    void init(int _note){
         amplitude = 0;
-        deltaA = 1.0f; // start fading up
-        button = _button;
+        note = _note;
+        fadeUp();
     }
     
     void update(float rate){
@@ -50,127 +50,232 @@ struct Channel {
     }
 };
 
-Channel *buttonChannels[13]; // each note button may be being played be a channel
+// octaves from -2 to 2, which is 5*12+1 notes (we keep that top one). 13 notes are visible at a time.
+#define OCTAVES 5
+#define NUMNOTES (OCTAVES*12+1)
+
+Channel *noteChannels[NUMNOTES]; // each note may be being played be a channel
 
 struct Chord2 : Module {
     dsp::ClockDivider divider;
     dsp::ClockDivider lightdivider;
+    dsp::BooleanTrigger octDTrigger,octUTrigger, noteTriggers[13];
     
     Pool<Channel> *pool;
-    
-    bool prevButtonStates[13];
+    int octave; // octrave being viewed
+    bool noteStates[NUMNOTES];
     
     Chord2() {
         pool = NULL; // can't allocate pool until we have maxchans
+        octave = 0; // range -2 to 2
+        
+        for(int i=0;i<NUMNOTES;i++){
+            noteChannels[i]=NULL;
+            noteStates[i]=false;
+        }
+        
+        ///// PARAMETER CONFIG /////
         
         // CAREFUL - we're using the same IDs for lights as params
         config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN,
-               PARAMS_LEN-2 // some params are lights
+               PARAMS_LEN-4 // some params are lights
                );
         
         for(int i=0;i<=12;i++){
-            configSwitch(switchParamMap[i], 0.0f, 1.0f, 0.0f,
-                         string::f("%d semitones above root",i));
-            buttonChannels[i]=NULL;
-            prevButtonStates[i]=false;
+            configButton(switchParamMap[i], string::f("%d semitones above root",i));
         }
-        configParam(RATE_PARAM, 0.0f, 1.0f, 0.5f, "rate of amp. change");
-        configParam(CHANS_PARAM, 0.0f, 12.0f, 4.0f, "channel count");
+        
+        // these have Z at the start to ensure that gencomponents puts
+        // them at the end of the ParamId enum!
+        
+        configParam(ZRATE_PARAM, 0.0f, 1.0f, 0.5f, "rate of amp. change");
+        configParam(ZCHANS_PARAM, 0.0f, 12.0f, 4.0f, "channel count");
+        
+        configButton(ZOCTD_PARAM, "octave down");
+        configButton(ZOCTU_PARAM, "octave up");
+        
         configInput(ROOT_INPUT, "Mono 1V/CV input");
         configOutput(POLY_OUTPUT, "Poly 1V/oct output");
         configOutput(CVOUT_OUTPUT, "Poly amplitude CV output");
         
         divider.setDivision(16);
+        lightdivider.setDivision(128);
     }
     
     void process(const ProcessArgs& args) override {
-        
-        int maxc = (int)(params[CHANS_PARAM].getValue()+0.2f);
-        if(maxc != maxChans){ // this will also be true when pool=null, at initialisaiton
-            maxChans = maxc;
-            // switch to new pool
-            delete pool;
-            pool = new Pool<Channel>(maxc);
-            // turn off lights and buttons
-            for(int i=0;i<=12;i++){
-                params[switchParamMap[i]].setValue(0);
-                lights[switchParamMap[i]].setBrightness(0);
-                buttonChannels[i]=NULL;
+        if(divider.process()){
+            int maxc = (int)(params[ZCHANS_PARAM].getValue()+0.2f);
+            
+            if(octDTrigger.process(params[ZOCTD_PARAM].getValue()>0.f)){
+                octave--;
+                if(octave<-2)octave=-2;
+            } else if(octUTrigger.process(params[ZOCTU_PARAM].getValue()>0.f)){
+                octave++;
+                if(octave>2)octave=2;
             }
+            
+            // deal with channel count change; reset everything
+            if(maxc != maxChans){ // this will also be true when pool=null, at initialisaiton
+                maxChans = maxc;
+                // switch to new pool
+                delete pool;
+                pool = new Pool<Channel>(maxc);
+                for(int i=0;i<NUMNOTES;i++){
+                    noteChannels[i]=NULL;
+                    noteStates[i]=false;
+                }
                 
-        }
-        
-        // Find edges in button presses
-        for(int i=0;i<=12;i++){
-            bool st = params[switchParamMap[i]].getValue() >= 0.1f;
-            if(st && !prevButtonStates[i]){
-                // button went down. 
-                // is this button already running in a channel?
-                if(buttonChannels[i]){
-                    // yes, just fade up
-                    buttonChannels[i]->fadeUp();
-                } else {
-                    // no, allocate a channel and fade up.
-                    // If not possible, force the button back up again.
-                    Channel *c = pool->alloc();
-                    if(!c){
-                        params[switchParamMap[i]].setValue(0);
+                // turn off lights and buttons
+                for(int i=0;i<=12;i++){
+                    params[switchParamMap[i]].setValue(0);
+                    lights[switchParamMap[i]].setBrightness(0);
+                    noteChannels[i]=NULL;
+                }
+            }
+            
+            // handle button presses
+            
+            for(int i=0;i<=12;i++){
+                if(noteTriggers[i].process(params[switchParamMap[i]].getValue()>0.f)){
+                    int note = (octave+2)*12+i; // get note number from octave+button
+                    noteStates[note] = !noteStates[note]; // toggle note state
+                    if(noteStates[note]){
+                        // was off, is now on
+                        // is this button already running in a channel?
+                        if(noteChannels[note]){
+                            // yes, just fade up
+                            noteChannels[note]->fadeUp();
+                        } else {
+                            // no, allocate a channel and fade up if we can. If we can't, toggle
+                            // the note state off again.
+                            Channel *c = pool->alloc();
+                            if(c){
+                                c->init(note);
+                                noteChannels[note]=c;
+                            } else {
+                                noteStates[note] = false;
+                            }
+                        }
                     } else {
-                        c->init(i);
-                        buttonChannels[i]=c;
+                        // was on, is now off. Start the channel fading down.
+                        if(noteChannels[note]){
+                            noteChannels[note]->fadeDown();
+                        } else {
+                        }
                     }
                 }
-            } else if (!st && prevButtonStates[i]){
-                // button went up. Start the channel fading down.
-                if(buttonChannels[i])
-                    buttonChannels[i]->fadeDown();
             }
-            prevButtonStates[i] = st;
-        }
-        
-        int root = (int)((inputs[ROOT_INPUT].getVoltage()*12.0f)+0.001f);
-        float rate = params[RATE_PARAM].getValue() * 0.01f;
-        rate *= rate;
-        
-        // iterate over the running channels, updating them. If a channel has faded down to less than zero,
-        // free it. We iterate over ALL channels, not just the running ones, so we
-        // can ensure the output channels in the data have consistent numbers, the 
-        // channel count is always the same, and non-running channels are zeroed.
-        // If we try to swap channels or change the count, we get clicks.
-        
-        for(int i=0;i<maxChans;i++){
-            float amp = 0;
-            float pitch = 0;
             
-            Channel *c = pool->get(i);
-            if(c){
-                c->update(rate);
-                amp = c->amplitude;
-                lights[switchParamMap[c->button]].setBrightness(amp);
-                if(c->finished()){
-                    pitch = 0;
-                    buttonChannels[c->button] = NULL;
-                    pool->free(c);
+            int root = (int)((inputs[ROOT_INPUT].getVoltage()*12.0f)+0.001f);
+            float rate = params[ZRATE_PARAM].getValue() * 0.1f;
+            rate *= rate;
+            
+            // iterate over the running channels, updating them. If a channel has faded down to less than zero,
+            // free it. We iterate over ALL channels, not just the running ones, so we
+            // can ensure the output channels in the data have consistent numbers, the 
+            // channel count is always the same, and non-running channels are zeroed.
+            // If we try to swap channels or change the count, we get clicks.
+            
+            for(int i=0;i<maxChans;i++){
+                float amp = 0;
+                float pitch = 0;
+                
+                Channel *c = pool->get(i);
+                if(c){
+                    c->update(rate);
+                    amp = c->amplitude;
+                    if(c->finished()){
+                        pitch = 0;
+                        noteChannels[c->note] = NULL;
+                        pool->free(c);
+                    } else {
+                        // we subtract 24 because c->note is zero-based,
+                        // although the octaves run -2..2.
+                        int note = root+c->note - 24;
+                        pitch = ((float)note)/12.0f;
+                    }
                 } else {
-                    pitch = ((float)(root+c->button))/12.0f;
+                    amp = 0;
+                    pitch = 0;
                 }
-            } else {
-                amp = 0;
-                pitch = 0;
+                outputs[CVOUT_OUTPUT].setVoltage(amp*10.0f,i);
+                outputs[POLY_OUTPUT].setVoltage(pitch,i);
             }
-            outputs[CVOUT_OUTPUT].setVoltage(amp*10.0f,i);
-            outputs[POLY_OUTPUT].setVoltage(pitch,i);
+            
+            // update lights
+            
+            outputs[CVOUT_OUTPUT].setChannels(maxChans);
+            outputs[POLY_OUTPUT].setChannels(maxChans);
         }
-        outputs[CVOUT_OUTPUT].setChannels(maxChans);
-        outputs[POLY_OUTPUT].setChannels(maxChans);
         
+        if(lightdivider.process()){
+            for(int i=0;i<=12;i++){
+                int note = (octave+2)*12+i; // get note number from octave+button
+                float amp = noteChannels[note] ? noteChannels[note]->amplitude : 0;
+                lights[switchParamMap[i]].setBrightness(amp);
+            }
+        }
+    }
+    
+    json_t *dataToJson() override {
+        json_t *root = json_object();
+        json_object_set_new(root, "octave", json_integer(octave));
+        return root;
+    }
+    
+    void dataFromJson(json_t *root) override {
+        if(root){
+            json_t *t;
+            if((t = json_object_get(root,"octave"))){
+                octave = json_integer_value(t);
+            }
+        }
     }
 };
+
+#define FONTNAME "res/Segment7Standard.ttf"
+class OctDisplay : public TransparentWidget {
+    Chord2 *module;
+    std::string fontPath;
+public:    
+    explicit OctDisplay(Chord2 *m) :
+    module(m),
+          fontPath(asset::plugin(pluginInstance,FONTNAME))
+    {
+    }
+    void drawLayer(const DrawArgs& args, int layer) override {
+        if(layer==1){
+            drawString(args);
+        }
+        Widget::drawLayer(args,layer);
+    }
+    
+    void drawString(const DrawArgs& args) {
+        if(!module)return;
+        std::shared_ptr<Font> font = APP->window->loadFont(fontPath);
+        if(!font)return;
+        auto vg = args.vg;
+        nvgScissor(vg,0,0,box.size.x,box.size.y);
+        nvgFontSize(vg,22);
+        nvgFontFaceId(vg,font->handle);
+        nvgTextAlign(vg, NVG_ALIGN_CENTER);
+        nvgFillColor(vg, nvgRGB(200,200,80));
+        char buf[5];
+        sprintf(buf,"%d",module->octave);
+        nvgText(vg,
+                box.size.x * 0.5f,
+                18.0f,buf,
+                nullptr);
+    }
+    
+};
+
 
 
 struct Chord2Widget : ModuleWidget {
     
-#define BUTTONSTYLE VCVLightBezelLatch<>
+#define BUTTONSTYLE VCVLightBezel<>
+#define OCTBUTTONSTYLE BefacoPush
 #define RATEKNOBSTYLE RoundBlackKnob
 #define CHANKNOBSTYLE Trimpot
     
@@ -197,12 +302,21 @@ struct Chord2Widget : ModuleWidget {
         addParam(createLightParamCentered<BUTTONSTYLE>(mm2px(N11_PARAM_POS), module, N11_PARAM, N11_PARAM));
         addParam(createLightParamCentered<BUTTONSTYLE>(mm2px(N12_PARAM_POS), module, N12_PARAM, N12_PARAM));
         
-        addParam(createParamCentered<RATEKNOBSTYLE>(mm2px(RATE_PARAM_POS), module, RATE_PARAM));
-        addParam(snap(module,createParamCentered<CHANKNOBSTYLE>(mm2px(CHANS_PARAM_POS), module, CHANS_PARAM)));
+        addParam(createParamCentered<RATEKNOBSTYLE>(mm2px(ZRATE_PARAM_POS), module, ZRATE_PARAM));
+        addParam(snap(module,createParamCentered<CHANKNOBSTYLE>(mm2px(ZCHANS_PARAM_POS), module, ZCHANS_PARAM)));
+        
+        addParam(createParamCentered<OCTBUTTONSTYLE>(mm2px(ZOCTD_PARAM_POS), module, ZOCTD_PARAM));
+        addParam(createParamCentered<OCTBUTTONSTYLE>(mm2px(ZOCTU_PARAM_POS), module, ZOCTU_PARAM));
         
         addInput(createInputCentered<PJ301MPort>(mm2px(ROOT_INPUT_POS), module, ROOT_INPUT));
         addOutput(createOutputCentered<PJ301MPort>(mm2px(POLY_OUTPUT_POS), module, POLY_OUTPUT));
         addOutput(createOutputCentered<PJ301MPort>(mm2px(CVOUT_OUTPUT_POS), module, CVOUT_OUTPUT));
+        
+        OctDisplay* d = new OctDisplay(module);
+        d->setPosition(mm2px(Vec(30,128.5f-47)));
+        d->setSize(mm2px(Vec(10,30)));
+        addChild(d);
+        
     }
 };
 
