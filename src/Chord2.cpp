@@ -20,8 +20,6 @@ ParamId switchParamMap[] = // can't guarantee order of params in ParamId enum wh
     N12_PARAM
 };
 
-int maxChans=-1;
-
 struct Channel {
     float amplitude;
     float deltaA;
@@ -54,8 +52,6 @@ struct Channel {
 #define OCTAVES 5
 #define NUMNOTES (OCTAVES*12+1)
 
-Channel *noteChannels[NUMNOTES]; // each note may be being played be a channel
-
 struct Chord2 : Module {
     dsp::ClockDivider divider;
     dsp::ClockDivider lightdivider;
@@ -64,10 +60,14 @@ struct Chord2 : Module {
     Pool<Channel> *pool;
     int octave; // octrave being viewed
     bool noteStates[NUMNOTES];
+    Channel *noteChannels[NUMNOTES]; // each note may be being played be a channel
+    int maxChans;
+
     
     Chord2() {
         pool = NULL; // can't allocate pool until we have maxchans
         octave = 0; // range -2 to 2
+        maxChans = -1;
         
         for(int i=0;i<NUMNOTES;i++){
             noteChannels[i]=NULL;
