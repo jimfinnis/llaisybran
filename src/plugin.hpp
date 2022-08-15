@@ -9,4 +9,4 @@ extern Plugin* pluginInstance;
 
 // Declare each Model, defined in each module source file
 extern Model* modelOctaveLimiter, *modelPolySelect, *modelChord,
-*modelChord2;
+*modelChord2, *modelNeuron;

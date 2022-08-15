@@ -36,6 +36,12 @@
       "name": "Poly Select",
       "description": "Uses a CV to select a single channel from a polyphonic signal",
       "tags": ["Polyphonic","Utility"]
+    },
+    {
+      "slug": "Neuron",
+      "name": "Neuron",
+      "description": "",
+      "tags": ["Polyphonic","Utility"]
     }
 
   ]
